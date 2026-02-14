@@ -8,10 +8,37 @@ router.get("/", async (req, res) => {
 });
 
 // Add
-router.post("/add", async (req, res) => {
-  const tx = await Transaction.create(req.body);
-  res.json(tx);
+router.post("/", async (req, res) => {
+  try {
+
+    console.log("BODY:", req.body);
+
+    const { amount, type, category, division, date } = req.body;
+
+    if (!amount || !type) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    const tx = await Transaction.create({
+      amount: Number(amount),
+      type: type.toLowerCase(),
+      category,
+      division,
+      date: date ? new Date(date) : new Date()
+    });
+
+    res.json(tx);
+
+  } catch (error) {
+
+    console.error("POST ERROR:", error);
+
+    res.status(500).json({
+      message: error.message
+    });
+  }
 });
+
 
 // Edit (12-hour rule)
 router.put("/edit/:id", async (req, res) => {
@@ -71,5 +98,7 @@ router.post("/transfer", async (req, res) => {
 
   res.json({ message: "Transfer successful" });
 });
+
+
 
 module.exports = router;
